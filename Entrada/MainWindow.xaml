@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Entrada"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="300" Width="800">
     <Grid>
         <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="25,27,0,0" TextWrapping="Wrap" Text="Elegir dispositivo:" VerticalAlignment="Top"/>
         <ComboBox x:Name="cmbDispositivos" HorizontalAlignment="Left" Margin="25,48,0,0" VerticalAlignment="Top" Width="735"/>
         <Button x:Name="btnIniciar" Content="Iniciar" HorizontalAlignment="Left" Margin="25,75,0,0" VerticalAlignment="Top" Width="75" Click="btnIniciar_Click"/>
         <Button x:Name="btnDetener" Content="Detener" HorizontalAlignment="Left" Margin="115,75,0,0" VerticalAlignment="Top" Width="75"/>
-        <Slider x:Name="sldMicrofono" HorizontalAlignment="Left" Margin="140,162,0,0" VerticalAlignment="Top" Width="162" RenderTransformOrigin="0.5,0.5">
+        <Slider x:Name="sldMicrofono" HorizontalAlignment="Left" Margin="140,162,0,0" VerticalAlignment="Top" Width="162" RenderTransformOrigin="0.5,0.5" Maximum="1" LargeChange="0.2" SmallChange="0.01">
             <Slider.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
