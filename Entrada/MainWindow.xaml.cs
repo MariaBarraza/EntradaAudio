@@ -61,6 +61,23 @@ namespace Entrada
             int bytesGrabados = e.BytesRecorded;
             float acumulador = 0.0f;
 
+            double numeroDeMuestras = bytesGrabados / 2;
+            int exponente = 1;
+            int numeroDeMuestrasComplejas = 0;
+            int bitsMaximos = 0;
+
+            do
+            {
+                bitsMaximos = (int)Math.Pow(2, exponente);
+                exponente++;
+            } while (bitsMaximos < numeroDeMuestras);
+            exponente--;
+            numeroDeMuestrasComplejas = bitsMaximos / 2;
+
+            Complex[] señalCompleja = new Complex[numeroDeMuestrasComplejas];
+
+
+
             for (int i = 0; i<bytesGrabados; i+=2)
             {
                 //<< es una instruccion de bajo nivel
@@ -71,9 +88,28 @@ namespace Entrada
                     (short)(buffer[i + 1] << 8 | buffer[i]);
                 float muestra32bits = (float)muestra / 32768.0f;
                 acumulador += Math.Abs(muestra32bits);
+                
+                if(i/2 < numeroDeMuestrasComplejas)
+                {
+                    //X es la parte real de los complex
+                    //Y es la parte imaginaria
+                    señalCompleja[i / 2].X = muestra32bits;
+                }
+                
+
+                
+
             }
             float promedio = acumulador / (bytesGrabados/2.0f);
             sldMicrofono.Value = (double)promedio;
+
+            //es parte de la libreria Naudio para obtener la transformada de fourier
+            //el numero de muestras tiene que ser una potencia de 2, en el analisis en tiempo real se suele deshacer de las muestras sobrantes para realizar esto
+            //tiempo a frecuencia forward true
+            //frecuencia a tiempo forward false
+            //m es el numero de muestras
+            //FastFourierTransform.FFT()
+
         }
 
         private void btnDetener_Click(object sender, RoutedEventArgs e)
