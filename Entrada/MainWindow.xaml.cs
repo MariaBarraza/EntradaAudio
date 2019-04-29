@@ -45,7 +45,7 @@ namespace Entrada
             waveIn = new WaveIn();
 
             //Formato de audio
-            waveIn.WaveFormat = new WaveFormat(44100, 16, 1);
+            waveIn.WaveFormat = new WaveFormat(44100, 16, 1); //estandar audio digital
             //Buffer
             waveIn.BufferMilliseconds = 250;
             //¿Que hacer cuando hay muestras disponibles?
@@ -108,7 +108,14 @@ namespace Entrada
             //tiempo a frecuencia forward true
             //frecuencia a tiempo forward false
             //m es el numero de muestras
+
             //FastFourierTransform.FFT()
+
+            if (promedio>0)
+            {
+                FastFourierTransform.FFT(true,exponente,señalCompleja);
+
+            }
 
         }
 
