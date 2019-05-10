@@ -71,7 +71,7 @@ namespace Entrada
                 bitsMaximos = (int)Math.Pow(2, exponente);
                 exponente++;
             } while (bitsMaximos < numeroDeMuestras);
-            exponente--;
+            exponente-=2;
             numeroDeMuestrasComplejas = bitsMaximos / 2;
 
             Complex[] señalCompleja = new Complex[numeroDeMuestrasComplejas];
@@ -113,8 +113,25 @@ namespace Entrada
 
             if (promedio>0)
             {
+                //true->tiempo frecuencia, false -> frecuencia tiempo
                 FastFourierTransform.FFT(true,exponente,señalCompleja);
 
+                float[] valoresAbsolutos = new float[señalCompleja.Length];
+
+                for(int i=0;i<señalCompleja.Length;i++)
+                {
+                    valoresAbsolutos[i] =(float) Math.Sqrt
+                        (
+                            (señalCompleja[i].X * señalCompleja[i].X) + 
+                            (señalCompleja[i].Y * señalCompleja[i].Y)
+                        );
+                }
+                //Se hace una lista con los valores absolutos y se busca el maximo, regresa la posicion de el numero
+                int indiceSeñalConMasPresencia = valoresAbsolutos.ToList().IndexOf(valoresAbsolutos.Max());
+
+                float frecuenciaFundamental = (float)(indiceSeñalConMasPresencia * waveIn.WaveFormat.SampleRate) / (float) valoresAbsolutos.Length;
+
+                lblFrecuencia.Text = frecuenciaFundamental.ToString("f");
             }
 
         }
