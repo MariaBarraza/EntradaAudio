@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9E26AF73-5CBD-40F4-83CE-88AD7278A8AD}</ProjectGuid>
+    <ProjectGuid>{9BD8AA3D-23EF-4A2B-A5AD-E6901CECCB11}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>Entrada</RootNamespace>
     <AssemblyName>Entrada</AssemblyName>
@@ -96,6 +96,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="carro.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

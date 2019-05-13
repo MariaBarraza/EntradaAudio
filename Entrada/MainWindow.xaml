@@ -5,23 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Entrada"
         mc:Ignorable="d"
-        Title="MainWindow" Height="300" Width="800">
+        Title="MainWindow" Height="520.079" Width="800">
     <Grid>
-        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="25,27,0,0" TextWrapping="Wrap" Text="Elegir dispositivo:" VerticalAlignment="Top"/>
-        <ComboBox x:Name="cmbDispositivos" HorizontalAlignment="Left" Margin="25,48,0,0" VerticalAlignment="Top" Width="735"/>
-        <Button x:Name="btnIniciar" Content="Iniciar" HorizontalAlignment="Left" Margin="25,75,0,0" VerticalAlignment="Top" Width="75" Click="btnIniciar_Click"/>
-        <Button x:Name="btnDetener" Content="Detener" HorizontalAlignment="Left" Margin="115,75,0,0" VerticalAlignment="Top" Width="75"/>
-        <Slider x:Name="sldMicrofono" HorizontalAlignment="Left" Margin="140,162,0,0" VerticalAlignment="Top" Width="162" RenderTransformOrigin="0.5,0.5" Maximum="1" LargeChange="0.2" SmallChange="0.01">
-            <Slider.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform/>
-                    <RotateTransform Angle="-89.832"/>
-                    <TranslateTransform/>
-                </TransformGroup>
-            </Slider.RenderTransform>
-        </Slider>
-        <TextBlock x:Name="lblFrecuencia" HorizontalAlignment="Left" Margin="70,164,0,0" TextWrapping="Wrap" Text="0.0" VerticalAlignment="Top" FontSize="36"/>
+        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Elegir dispositivo:" VerticalAlignment="Top"/>
+        <ComboBox x:Name="cmbDispositivos" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Width="772"/>
+        <Button x:Name="btnIniciar" Content="Iniciar" HorizontalAlignment="Left" Margin="10,58,0,0" VerticalAlignment="Top" Width="75" Click="btnIniciar_Click"/>
+        <Button x:Name="btnDetener" Content="Detener" HorizontalAlignment="Left" Margin="90,58,0,0" VerticalAlignment="Top" Width="75" Click="btnDetener_Click"/>
+        <Slider x:Name="sldMicrofono" HorizontalAlignment="Left" Margin="301,58,0,0" VerticalAlignment="Top" Width="21" Orientation="Vertical" Height="105" Maximum="1" LargeChange="0.2" SmallChange="0.01"/>
+        <TextBlock x:Name="lblFrecuencia" HorizontalAlignment="Left" Margin="10,122,0,0" TextWrapping="Wrap" Text="0.0" VerticalAlignment="Top" FontSize="48" Width="286" TextAlignment="Right"/>
+        <TextBlock x:Name="lbl500" HorizontalAlignment="Left" Margin="372,87,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="48"/>
+        <Canvas x:Name="canvas" HorizontalAlignment="Left" Height="265" Margin="10,214,0,0" VerticalAlignment="Top" Width="772">
+            <Image x:Name="imgCarro" Height="100" Canvas.Left="28" Canvas.Top="43" Width="100" Source="carro.png"/>
+            <TextBox x:Name="txtTexto" Height="88" Canvas.Left="10" TextWrapping="Wrap" Text="TextBox" Canvas.Top="167" Width="752"/>
+            <TextBlock x:Name="lbl_EO" Canvas.Left="529" TextWrapping="Wrap" Text="EO!" Canvas.Top="114" FontSize="36" Visibility="Hidden"/>
+        </Canvas>
 
     </Grid>
 </Window>

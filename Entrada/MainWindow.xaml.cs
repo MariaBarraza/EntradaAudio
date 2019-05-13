@@ -13,9 +13,13 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using System.Windows.Threading;
+
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
-using NAudio.Dsp; //procesamiento digital de señales
+using NAudio.Dsp;
+
+using System.Diagnostics; //libreria para manejo de tiempo
 
 namespace Entrada
 {
@@ -25,34 +29,95 @@ namespace Entrada
     public partial class MainWindow : Window
     {
         WaveIn waveIn;
+        DispatcherTimer timer;
+        Stopwatch cronometro;
+        string letraAnterior = "";
+        String letraActual = "";
+
+        float frecuenciaFundamental = 0.0f;
+
         public MainWindow()
         {
             InitializeComponent();
+            timer = new DispatcherTimer();
+            timer.Interval = 
+                TimeSpan.FromMilliseconds(100);
+            timer.Tick += Timer_Tick;
+
+            cronometro = new Stopwatch();
+
             LlenarComboDispositivos();
         }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            if (frecuenciaFundamental >= 500)
+            {
+                var leftCarro = Canvas.GetLeft(imgCarro);
+                Canvas.SetLeft(imgCarro,
+                    leftCarro +
+                    (frecuenciaFundamental / 500.0) * 0.5);
+            }
+            else
+            {
+                Canvas.SetLeft(imgCarro, 10);
+            }
+
+            //texto
+            if(letraActual!="" && letraActual==letraAnterior)
+            {
+                //evaluar si ya paso un segundo 
+                if(cronometro.ElapsedMilliseconds>=1000)
+                {
+                    txtTexto.AppendText(letraActual); //concatena las letras
+                    letraActual = "";
+                    cronometro.Restart();
+                    if(txtTexto.Text.Length>=2)
+                    {
+                        //PARAMETROS donde inicia,el tamaño
+                        string texto = txtTexto.Text.Substring(-2, 2);
+
+                        if(texto=="EO")
+                        {
+                            lbl_EO.Visibility = Visibility.Visible;
+                        }
+
+                    }
+                }
+            }else
+            {
+                cronometro.Restart();
+            }
+
+        }
+
         public void LlenarComboDispositivos()
         {
-           for(int i=0; i < WaveIn.DeviceCount; i++)
+            for(int i=0; i<WaveIn.DeviceCount; 
+                i++)
             {
-                WaveInCapabilities capacidades = WaveIn.GetCapabilities(i);
-                cmbDispositivos.Items.Add(capacidades.ProductName);
+                WaveInCapabilities capacidades =
+                    WaveIn.GetCapabilities(i);
+                cmbDispositivos.Items.Add(
+                    capacidades.ProductName);
             }
             cmbDispositivos.SelectedIndex = 0;
         }
 
         private void btnIniciar_Click(object sender, RoutedEventArgs e)
         {
+            timer.Start();
             waveIn = new WaveIn();
-
             //Formato de audio
-            waveIn.WaveFormat = new WaveFormat(44100, 16, 1); //estandar audio digital
+            waveIn.WaveFormat =
+                new WaveFormat(44100, 16, 1);
             //Buffer
-            waveIn.BufferMilliseconds = 250;
+            waveIn.BufferMilliseconds =
+                250;
             //¿Que hacer cuando hay muestras disponibles?
             waveIn.DataAvailable += WaveIn_DataAvailable;
 
             waveIn.StartRecording();
-
         }
 
         private void WaveIn_DataAvailable(object sender, WaveInEventArgs e)
@@ -61,7 +126,8 @@ namespace Entrada
             int bytesGrabados = e.BytesRecorded;
             float acumulador = 0.0f;
 
-            double numeroDeMuestras = bytesGrabados / 2;
+            double numeroDeMuestras =
+                bytesGrabados / 2;
             int exponente = 1;
             int numeroDeMuestrasComplejas = 0;
             int bitsMaximos = 0;
@@ -71,68 +137,91 @@ namespace Entrada
                 bitsMaximos = (int)Math.Pow(2, exponente);
                 exponente++;
             } while (bitsMaximos < numeroDeMuestras);
-            exponente-=2;
+
             numeroDeMuestrasComplejas = bitsMaximos / 2;
+            exponente-=2;
 
-            Complex[] señalCompleja = new Complex[numeroDeMuestrasComplejas];
+            Complex[] señalCompleja =
+                new Complex[numeroDeMuestrasComplejas];
 
-
-
-            for (int i = 0; i<bytesGrabados; i+=2)
+            for(int i=0; i<bytesGrabados; i+=2)
             {
-                //<< es una instruccion de bajo nivel
-                // Transformando 2 bytes separdos en una muestra de 16 bits
-                //1.-Toma el segundo byte y le antepone 8 0's al inicio
-                //2.- Hace un 0R con el primer byte, al cual automaticamente se le llenan 8 0's al final
+                //Transformando 2 bytes separados
+                //en una muestra de 16 bits
+                //1.- Toma el segundo byte y el antepone
+                //     8 0's al principio
+                //2.- Hace un OR con el primer byte, al cual
+                //   automaticamente se le llenan 8 0's al final
                 short muestra =
                     (short)(buffer[i + 1] << 8 | buffer[i]);
-                float muestra32bits = (float)muestra / 32768.0f;
+                float muestra32bits =
+                    (float)muestra / 32768.0f;
                 acumulador += Math.Abs(muestra32bits);
-                
-                if(i/2 < numeroDeMuestrasComplejas)
-                {
-                    //X es la parte real de los complex
-                    //Y es la parte imaginaria
-                    señalCompleja[i / 2].X = muestra32bits;
-                }
-                
 
-                
+                if (i/2 < numeroDeMuestrasComplejas)
+                {
+                    señalCompleja[i / 2].X =
+                        muestra32bits;
+                }
 
             }
-            float promedio = acumulador / (bytesGrabados/2.0f);
+            float promedio = acumulador / 
+                (bytesGrabados / 2.0f);
             sldMicrofono.Value = (double)promedio;
-
-            //es parte de la libreria Naudio para obtener la transformada de fourier
-            //el numero de muestras tiene que ser una potencia de 2, en el analisis en tiempo real se suele deshacer de las muestras sobrantes para realizar esto
-            //tiempo a frecuencia forward true
-            //frecuencia a tiempo forward false
-            //m es el numero de muestras
 
             //FastFourierTransform.FFT()
 
-            if (promedio>0)
+            if (promedio > 0)
             {
-                //true->tiempo frecuencia, false -> frecuencia tiempo
-                FastFourierTransform.FFT(true,exponente,señalCompleja);
+                FastFourierTransform.FFT(true, exponente, 
+                    señalCompleja);
 
-                float[] valoresAbsolutos = new float[señalCompleja.Length];
-
-                for(int i=0;i<señalCompleja.Length;i++)
+                float[] valoresAbsolutos =
+                    new float[señalCompleja.Length];
+                for(int i=0; i < señalCompleja.Length; i++)
                 {
-                    valoresAbsolutos[i] =(float) Math.Sqrt
-                        (
-                            (señalCompleja[i].X * señalCompleja[i].X) + 
-                            (señalCompleja[i].Y * señalCompleja[i].Y)
-                        );
+                    valoresAbsolutos[i] = (float)
+                        Math.Sqrt(
+                            (señalCompleja[i].X * señalCompleja[i].X) +
+                            (señalCompleja[i].Y * señalCompleja[i].Y));
                 }
-                //Se hace una lista con los valores absolutos y se busca el maximo, regresa la posicion de el numero
-                int indiceSeñalConMasPresencia = valoresAbsolutos.ToList().IndexOf(valoresAbsolutos.Max());
 
-                float frecuenciaFundamental = (float)(indiceSeñalConMasPresencia * waveIn.WaveFormat.SampleRate) / (float) valoresAbsolutos.Length;
+                int indiceSeñalConMasPresencia =
+                    valoresAbsolutos.ToList().IndexOf(
+                        valoresAbsolutos.Max());
 
-                lblFrecuencia.Text = frecuenciaFundamental.ToString("f");
+                frecuenciaFundamental =
+                    (float)(indiceSeñalConMasPresencia *
+                    waveIn.WaveFormat.SampleRate) /
+                    (float)valoresAbsolutos.Length;
+
+                letraAnterior = letraActual;
+                if(frecuenciaFundamental>=500 && frecuenciaFundamental<=550)
+                {
+                    letraActual = "A";
+                }else if(frecuenciaFundamental>=600&& frecuenciaFundamental<=650)
+                {
+                    letraActual = "E";
+                }else if(frecuenciaFundamental>=700 && frecuenciaFundamental<=750)
+                {
+                    letraActual = "I";
+                }else if(frecuenciaFundamental >=800 && frecuenciaFundamental<=850)
+                {
+                    letraActual = "O";
+                }else if(frecuenciaFundamental>=900 && frecuenciaFundamental<=950)
+                {
+                    letraActual = "U";
+                }else
+                {
+                    letraActual = "";
+                }
+
+
+                lblFrecuencia.Text =
+                    frecuenciaFundamental.ToString("f");
+                
             }
+
 
         }
 
